@@ -124,6 +124,33 @@ class robot:
         self.ls_points.append(ls_p)
 
 
+    def trouver_chemin(self, x, y):
+        pass
+
+    def deplacement_auto(self):
+        ls_p = self.ls_points[-1]
+        ls_dist = []
+        for point in range(1, len(ls_p)-1):
+            dist = math.sqrt((ls_p[point][0]-ls_p[point+1][0])**2+ (ls_p[point][1]-ls_p[point+1][1])**2)
+            print "p1", ls_p[point]
+            print "p1", ls_p[point+1]
+            ls_dist.append(dist)
+            print "dist = ", dist
+            print ""
+
+        print(ls_dist)
+        b = (0, 0)
+        for i in enumerate(ls_dist):
+            if i[1]>b[1]:
+                b = i
+        p1 = ls_p[b[0]+1]
+        p2 = ls_p[b[0]+2]
+
+        self.trouver_chemin(((p1[0]+p1[0])/2), ((p2[0]+p2[0])/2))
+
+
+
+
     def afficher_droites(self):
         for droite in self.ls_droites:
             print(str(droite[0])+"y+"+str(droite[1])+"x+"+str(droite[2])+"=0 xe["+ str(droite[3])+", "+str(droite[4])+ "] ye["+str(droite[5])+", "+str(droite[6])+"]")
@@ -158,17 +185,12 @@ class Carte:
 
 if __name__ == "__main__":
 
-    C = Carte([[(-10,-10), (-10, 10), (10, 10), (10, 0), (15,0), (15, 10), (20, 10), (20, -10)], [(2, -7), (2, -2), (5, -2), (5, -7)]])
+    C = Carte([[(10, 10), (10, -10), (-10, -10), (-10, 10)]])
 
 
     r = robot(C)
-
+    r.posy = 0
     r.tour_points()
 
-    r.tourner(math.pi/2)
-    r.avancer(2)
-
-    print (r.posx, r.posy)
-    r.tour_points()
-
+    r.deplacement_auto()
     convertir_fichier("map.sce",r.ls_points)
