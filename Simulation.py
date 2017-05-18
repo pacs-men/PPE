@@ -4,6 +4,15 @@ import numpy as np
 import math
 import pickle
 
+def sc(pi, gi, po, go, n):
+    pi= float(pi)
+    po= float(po)
+    gi= float(gi)
+    go= float(go)
+    n= float(n)
+    a = (go-po)/(gi-pi)
+    return (n-pi)*a+po
+
 def petit(n1, n2):
     if n1>n2:
         return n2
@@ -57,12 +66,14 @@ def convertir_fichier(nom_fichier, ls_p):
 
 class robot:
     def __init__(self, carte):
-        self.posx = 0
-        self.posy = 0
+        self.posx = 0.0
+        self.posy = 0.0
         self.angle = 0.0# angle en radians
         self.carte = carte
         self.ls_droites = []
         self.ls_points = []
+        self.dist_max_point = 2.5
+        self.division = 10
 
     def avancer(self, distance):
         self.posx = math.cos(self.angle)*distance
@@ -125,8 +136,28 @@ class robot:
 
 
     def trouver_chemin(self, x, y):
-        pass
 
+
+    def test_point(self, point):
+        for pointc in self.ls_points[-1]:
+            dist = math.sqrt((point[0]-pointc[0])**2 +(point[1]-pointc[1])**2)
+            if dist< self.dist_max_point:
+                return False
+            else:
+                return True
+    def test_droite(self, point1, point2):
+        droite_ok = True
+        ls_points = []
+        for i in range(self.division):
+            x = ((point2[0]-point1[0])/self.division)*i)+point1[0]
+            y = ((point2[1]-point1[1])/self.division)*i)+point1[1]
+
+            ls_points.append((x, y))
+
+        for point in ls_points:
+            if not self.test_point(point):
+                droite_ok = False
+        return droite_ok
     def deplacement_auto(self):
         ls_p = self.ls_points[-1]
         ls_dist = []
@@ -185,12 +216,12 @@ class Carte:
 
 if __name__ == "__main__":
 
-    C = Carte([[(10, 10), (10, -10), (-10, -10), (-10, 10)]])
+    C = Carte([[(-10, -10), (-10, 15), (20, 15), (20, 10), (5, 5), (5, -10)]])
 
 
     r = robot(C)
     r.posy = 0
     r.tour_points()
-
     r.deplacement_auto()
+    r.tour_points()
     convertir_fichier("map.sce",r.ls_points)
