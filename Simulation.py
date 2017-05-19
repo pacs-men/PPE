@@ -74,6 +74,7 @@ class robot:
         self.ls_points = []
         self.dist_max_point = 2.5
         self.division = 10
+        self.ls_pos = []
 
     def avancer(self, distance):
         self.posx = math.cos(self.angle)*distance
@@ -108,11 +109,11 @@ class robot:
     def tour_points(self):
         self.creer_droites()
         self.trouver_points()
-
+        self.ls_pos.append((self.posx, self.posy))
     def trouver_points(self):
 
         ls_p = []
-        ls_p.append((self.posx, self.posy))
+        #ls_p.append((self.posx, self.posy))
         for droite_robot in self.ls_droites:
             inter = False
             dist_inter = False
@@ -136,40 +137,48 @@ class robot:
 
 
     def trouver_chemin(self, x, y):
-
+        if self.test_droite((self.posx, self.posy), (x, y)):
+            self.posx = x
+            self.posy = y
+            print("CHEMIN BON")
+        else:
+            print("CHEMIN BLOQUE")
 
     def test_point(self, point):
+        point_bon = True
         for pointc in self.ls_points[-1]:
             dist = math.sqrt((point[0]-pointc[0])**2 +(point[1]-pointc[1])**2)
-            if dist< self.dist_max_point:
-                return False
-            else:
-                return True
+            print "dist", dist
+            if dist < self.dist_max_point:
+                point_bon  = False
+
+        return point_bon
     def test_droite(self, point1, point2):
         droite_ok = True
         ls_points = []
         for i in range(self.division):
-            x = ((point2[0]-point1[0])/self.division)*i)+point1[0]
-            y = ((point2[1]-point1[1])/self.division)*i)+point1[1]
+            x = (((point2[0]-point1[0])/self.division)*i)+point1[0]
+            y = (((point2[1]-point1[1])/self.division)*i)+point1[1]
 
             ls_points.append((x, y))
-
+        #self.ls_points.append(ls_points)
         for point in ls_points:
             if not self.test_point(point):
                 droite_ok = False
+            print droite_ok
         return droite_ok
+
     def deplacement_auto(self):
         ls_p = self.ls_points[-1]
         ls_dist = []
         for point in range(1, len(ls_p)-1):
             dist = math.sqrt((ls_p[point][0]-ls_p[point+1][0])**2+ (ls_p[point][1]-ls_p[point+1][1])**2)
-            print "p1", ls_p[point]
-            print "p1", ls_p[point+1]
+            #print "p1", ls_p[point]
+            #print "p1", ls_p[point+1]
             ls_dist.append(dist)
-            print "dist = ", dist
-            print ""
+            #print "dist = ", dist
+            #print ""
 
-        print(ls_dist)
         b = (0, 0)
         for i in enumerate(ls_dist):
             if i[1]>b[1]:
@@ -177,11 +186,10 @@ class robot:
         p1 = ls_p[b[0]+1]
         p2 = ls_p[b[0]+2]
 
-        self.trouver_chemin(((p1[0]+p1[0])/2), ((p2[0]+p2[0])/2))
-
-
-
-
+        #print(((p1[0]+p2[0])/2), ((p1[1]+p2[1])/2))
+        #self.trouver_chemin(((p1[0]+p2[0])/2), ((p1[1]+p2[1])/2))
+        self.trouver_chemin(0, 10)
+        #self.ls_points.append([(((p1[0]+p2[0])/2), ((p1[1]+p2[1])/2))])
     def afficher_droites(self):
         for droite in self.ls_droites:
             print(str(droite[0])+"y+"+str(droite[1])+"x+"+str(droite[2])+"=0 xe["+ str(droite[3])+", "+str(droite[4])+ "] ye["+str(droite[5])+", "+str(droite[6])+"]")
@@ -196,7 +204,6 @@ class Carte:
     def droites(self):
         for i in self.points:
             for j in range(len(i)):
-                print("i", i)
                 a = i[j]
                 if j != len(i)-1:
                     b = i[j+1]
@@ -216,7 +223,7 @@ class Carte:
 
 if __name__ == "__main__":
 
-    C = Carte([[(-10, -10), (-10, 15), (20, 15), (20, 10), (5, 5), (5, -10)]])
+    C = Carte([[(-10, -10), (-10, 15), (20, 15), (20, 5), (5, 5), (5, -10)]])
 
 
     r = robot(C)
@@ -224,4 +231,5 @@ if __name__ == "__main__":
     r.tour_points()
     r.deplacement_auto()
     r.tour_points()
+    r.ls_points.append(r.ls_pos)
     convertir_fichier("map.sce",r.ls_points)
